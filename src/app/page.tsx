@@ -106,6 +106,56 @@ const words = {
   ],
 
   medium: [
+    "meadow",
+    "tumour",
+    "complain",
+    "describe",
+    "constant",
+    "terrace",
+    "representative",
+    "similar",
+    "introduction",
+    "systematic",
+    "reserve",
+    "useful",
+    "orientation",
+    "loyalty",
+    "happen",
+    "generate",
+    "ditch",
+    "uniform",
+    "bench",
+    "rocket",
+    "method",
+    "congress",
+    "drama",
+    "coincide",
+    "industry",
+    "communication",
+    "committee",
+    "sculpture",
+    "animal",
+    "workshop",
+    "hallway",
+    "attack",
+    "autonomy",
+    "attitude",
+    "appetite",
+    "legislation",
+    "flash",
+    "persist",
+    "skilled",
+    "majority",
+    "border",
+    "support",
+    "blank",
+    "shell",
+    "remind",
+    "retirement",
+    "tower",
+    "thick",
+    "proper",
+    "expression",
     "although",
     "beginning",
     "children",
@@ -181,7 +231,6 @@ const words = {
     "effervescent",
     "flamboyant",
     "garrulous",
-    "higgledy-piggledy",
     "iconoclast",
     "juxtapose",
     "kaleidoscope",
@@ -275,7 +324,7 @@ function generateRandomSentence({
   difficulty: "easy" | "medium" | "hard"
   length?: number
 }) {
-  const _words = words.easy
+  const _words = words[difficulty]
   let sentence = ""
 
   for (let i = 0; i < length; i++) {
@@ -294,7 +343,7 @@ export default function Home() {
   const [userInput, setUserInput] = useState("")
 
   const generateSentence = () => {
-    setSentence(generateRandomSentence({ difficulty: "easy" }))
+    setSentence(generateRandomSentence({ difficulty: "medium" }))
     setUserInput("")
   }
 
