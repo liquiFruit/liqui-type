@@ -321,7 +321,7 @@ var lastNumber = -1
 
 function generateRandomSentence({
   difficulty,
-  length = 5,
+  length = 10,
 }: {
   difficulty: "easy" | "medium" | "hard"
   length?: number
