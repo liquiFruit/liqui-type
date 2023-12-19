@@ -317,6 +317,8 @@ const words = {
     "quixotic",
   ],
 }
+var lastNumber = -1
+
 function generateRandomSentence({
   difficulty,
   length = 5,
@@ -329,6 +331,7 @@ function generateRandomSentence({
 
   for (let i = 0; i < length; i++) {
     const r = Math.floor(Math.random() * _words.length)
+    if (r === lastNumber) continue
 
     sentence += _words[r]
 
