@@ -342,11 +342,13 @@ export default function Home() {
   const [sentence, setSentence] = useState("")
   const [userInput, setUserInput] = useState("")
   const [startTime, setStartTime] = useState<number | null>(null)
+  const [stats, setStats] = useState<Stats | null>(null)
 
   const generateSentence = () => {
     setSentence(generateRandomSentence({ difficulty: "easy" }))
     setUserInput("")
     setStartTime(null)
+    setStats(null)
   }
 
   useEffect(() => {
@@ -381,15 +383,17 @@ export default function Home() {
   useEffect(() => {
     if (userInput.length === 1 && startTime === null) setStartTime(Date.now())
 
-    if (userInput.length === sentence.length) {
-      const duration = Date.now() - startTime!
-      alert(duration / 1000 + " seconds")
-      generateSentence()
+    if (userInput.length === sentence.length && startTime !== null) {
+      {
+        const duration = Date.now() - startTime
+        setStats({ duration })
+      }
     }
   }, [userInput, sentence, startTime])
 
   return (
-    <main className="grid h-[100svh] place-items-center backdrop-blur-xl">
+    <main className="grid h-[100svh] place-content-center backdrop-blur-xl">
+      {stats ? <Statistics stats={stats} /> : null}
       <SentenceView sentence={sentence} userInput={userInput} />
     </main>
   )
@@ -449,4 +453,15 @@ function Character({
         ) : null}
       </div>
     )
+}
+
+type Stats = {
+  duration: number
+}
+function Statistics({ stats: { duration } }: { stats: Stats }) {
+  return (
+    <div className="mb-4 flex">
+      <span className="text-3xl">{(duration / 1000).toFixed(2)}s</span>
+    </div>
+  )
 }
