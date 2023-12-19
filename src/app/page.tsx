@@ -341,10 +341,12 @@ function generateRandomSentence({
 export default function Home() {
   const [sentence, setSentence] = useState("")
   const [userInput, setUserInput] = useState("")
+  const [startTime, setStartTime] = useState<number | null>(null)
 
   const generateSentence = () => {
-    setSentence(generateRandomSentence({ difficulty: "medium" }))
+    setSentence(generateRandomSentence({ difficulty: "easy" }))
     setUserInput("")
+    setStartTime(null)
   }
 
   useEffect(() => {
@@ -377,8 +379,14 @@ export default function Home() {
   }, [])
 
   useEffect(() => {
-    if (userInput.length === sentence.length) generateSentence()
-  }, [userInput, sentence])
+    if (userInput.length === 1 && startTime === null) setStartTime(Date.now())
+
+    if (userInput.length === sentence.length) {
+      const duration = Date.now() - startTime!
+      alert(duration / 1000 + " seconds")
+      generateSentence()
+    }
+  }, [userInput, sentence, startTime])
 
   return (
     <main className="grid h-[100svh] place-items-center backdrop-blur-xl">
