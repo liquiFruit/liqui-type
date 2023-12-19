@@ -389,7 +389,7 @@ export default function Home() {
     if (userInput.length === sentence.length && startTime !== null) {
       {
         const duration = Date.now() - startTime
-        setStats({ duration })
+        setStats({ duration, numChars: sentence.length })
       }
     }
   }, [userInput, sentence, startTime])
@@ -460,11 +460,15 @@ function Character({
 
 type Stats = {
   duration: number
+  numChars: number
 }
-function Statistics({ stats: { duration } }: { stats: Stats }) {
+function Statistics({ stats: { duration, numChars } }: { stats: Stats }) {
   return (
-    <div className="mb-4 flex">
+    <div className="mb-4 flex flex-row gap-8">
       <span className="text-3xl">{(duration / 1000).toFixed(2)}s</span>
+      <span className="text-3xl">
+        {(numChars / 5 / (duration / 60000)).toFixed(2)}wpm
+      </span>
     </div>
   )
 }
