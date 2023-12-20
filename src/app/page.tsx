@@ -421,7 +421,7 @@ function SentenceView({
   const currentIndex = userInput.length
 
   return (
-    <div className="flex flex-row  text-5xl">
+    <div className="flex flex-row gap-x-[0.2rem] text-5xl">
       {sentenceChars.map((expected, i) => (
         <Character
           key={expected + i}
@@ -455,18 +455,16 @@ function Character({
     return (
       <span
         className={cn(
-          "ml-[0.33ch] mr-[1ch] w-[0.1ch]",
+          "mx-[0.1ch] w-[0.6ch]",
           current && classNames,
-          received &&
-            received !== expected &&
-            " ml-[calc(0.33ch-0.2ch)] mr-[calc(0.67ch-0.2ch)] w-[calc(0.43ch+0.4ch)] rounded bg-rose-500/50",
+          received && received !== expected && "rounded bg-rose-500/80",
         )}
       />
     )
   else
     return (
       <div className="relative">
-        <span className={classNames + " px-2"}>{expected}</span>
+        <span className={classNames}>{expected}</span>
 
         {received ? (
           <span
