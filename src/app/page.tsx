@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react"
 
+import { cn } from "@/lib/util/cn"
+
 const words = {
   easy: [
     "the",
@@ -442,19 +444,23 @@ function Character({
   current?: boolean
 }) {
   const classNames = current
-    ? "text-black bg-yellow-300 animate-pulse"
+    ? "text-black bg-yellow-300 animate-pulse rounded"
     : !received
       ? "text-white/40"
       : expected === received
-        ? "text-emerald-500/70"
+        ? "text-emerald-500/70 "
         : "text-rose-500/70"
 
   if (expected === " ")
     return (
       <span
-        className={`ml-[0.33ch] mr-[1ch] w-[0.1ch] ${
-          current ? classNames : ""
-        }`}
+        className={cn(
+          "ml-[0.33ch] mr-[1ch] w-[0.1ch]",
+          current && classNames,
+          received &&
+            received !== expected &&
+            " ml-[calc(0.33ch-0.2ch)] mr-[calc(0.67ch-0.2ch)] w-[calc(0.43ch+0.4ch)] rounded bg-rose-500/50",
+        )}
       />
     )
   else
@@ -462,11 +468,11 @@ function Character({
       <div className="relative">
         <span className={classNames + " px-2"}>{expected}</span>
 
-        {expected === received ? (
+        {received ? (
           <span
             className={
               classNames +
-              " absolute right-1/2 top-1/2 -translate-y-1/2 translate-x-1/2 blur-md"
+              " absolute right-1/2 top-1/2 -translate-y-1/2 translate-x-1/2 blur-lg"
             }
           >
             {expected}
