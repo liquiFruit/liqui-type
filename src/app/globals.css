@@ -5,14 +5,3 @@
 body {
   @apply bg-gray-950 text-white;
 }
-
-.custom-animate-pulse-current {
-  @apply animate-pulse;
-  animation-name: "custom-pulse";
-}
-
-@keyframes custom-pulse {
-  to {
-    @apply bg-transparent text-white;
-  }
-}
