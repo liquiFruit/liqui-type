@@ -416,14 +416,16 @@ function SentenceView({
 }) {
   const sentenceChars = sentence.split("")
   const userInputChars = userInput.split("")
+  const currentIndex = userInput.length
 
   return (
-    <div className="flex flex-row gap-0.5 text-5xl">
+    <div className="flex flex-row  text-5xl">
       {sentenceChars.map((expected, i) => (
         <Character
           key={expected + i}
           expected={expected}
           received={userInputChars[i] ?? null}
+          current={i === currentIndex}
         />
       ))}
     </div>
@@ -433,21 +435,28 @@ function SentenceView({
 function Character({
   expected,
   received,
+  current = false,
 }: {
   expected: string
   received: string | null
+  current?: boolean
 }) {
-  const classNames = !received
-    ? "text-white/40"
-    : expected === received
-      ? "text-emerald-500/70"
-      : "text-rose-500/70"
+  const classNames = current
+    ? "text-black bg-yellow-300"
+    : !received
+      ? "text-white/40"
+      : expected === received
+        ? "text-emerald-500/70"
+        : "text-rose-500/70"
 
-  if (expected === " ") return <span className="w-2" />
+  if (expected === " ")
+    return (
+      <span className={`mx-[1ch] w-[0.1ch] ${current ? classNames : ""}`} />
+    )
   else
     return (
       <div className="relative">
-        <span className={classNames}>{expected}</span>
+        <span className={classNames + " px-2"}>{expected}</span>
 
         {expected === received ? (
           <span
