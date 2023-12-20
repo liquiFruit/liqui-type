@@ -488,11 +488,11 @@ type Stats = {
 }
 function Statistics({ stats: { duration, numChars } }: { stats: Stats }) {
   return (
-    <div className="mb-4 flex flex-row gap-8">
-      <span className="text-3xl">{(duration / 1000).toFixed(2)}s</span>
-      <span className="text-3xl">
-        {(numChars / 5 / (duration / 60000)).toFixed(2)}wpm
-      </span>
+    <div className="mb-4 flex flex-row gap-8 text-3xl">
+      <span>{(duration / 1000).toFixed(2)}s</span>
+      <span>{(numChars / 5 / (duration / 60000)).toFixed(2)}wpm</span>
+
+      <span>{numChars} chars</span>
     </div>
   )
 }
