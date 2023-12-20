@@ -451,7 +451,11 @@ function Character({
 
   if (expected === " ")
     return (
-      <span className={`mx-[1ch] w-[0.1ch] ${current ? classNames : ""}`} />
+      <span
+        className={`ml-[0.33ch] mr-[1ch] w-[0.1ch] ${
+          current ? classNames : ""
+        }`}
+      />
     )
   else
     return (
