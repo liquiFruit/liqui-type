@@ -317,7 +317,6 @@ const words = {
     "quixotic",
   ],
 }
-var lastNumber = -1
 
 function generateRandomSentence({
   difficulty,
@@ -326,19 +325,25 @@ function generateRandomSentence({
   difficulty: "easy" | "medium" | "hard"
   length?: number
 }) {
-  const _words = words[difficulty]
-  let sentence = ""
+  const available_words = words[difficulty]
+  let sentence: string[] = []
 
   for (let i = 0; i < length; i++) {
-    const r = Math.floor(Math.random() * _words.length)
-    if (r === lastNumber) continue
+    // Pick a random word
+    const r = Math.floor(Math.random() * available_words.length)
+    const newWord = available_words[r]
 
-    sentence += _words[r]
+    // Compare the word to the last word, reset `i` if necessary
+    const lastWord = sentence.at(-1)
+    if (newWord === lastWord) {
+      i -= 1
+      continue
+    }
 
-    if (i !== length - 1) sentence += " "
+    sentence.push(available_words[r])
   }
 
-  return sentence
+  return sentence.join(" ")
 }
 
 export default function Home() {
