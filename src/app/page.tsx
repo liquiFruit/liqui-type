@@ -442,7 +442,7 @@ function Character({
   current?: boolean
 }) {
   const classNames = current
-    ? "text-black bg-yellow-300"
+    ? "text-black bg-yellow-300 custom-animate-pulse-current"
     : !received
       ? "text-white/40"
       : expected === received
