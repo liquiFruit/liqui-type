@@ -1,8 +1,9 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 import { cn } from "@/lib/util/cn"
+import { pusher, type Channel } from "@/lib/util/pusher/client"
 
 const words = {
   easy: [
@@ -353,6 +354,7 @@ export default function Home() {
   const [userInput, setUserInput] = useState("")
   const [startTime, setStartTime] = useState<number | null>(null)
   const [stats, setStats] = useState<Stats | null>(null)
+  const gameChannel = useRef<Channel | null>(null)
 
   const generateSentence = () => {
     setSentence(generateRandomSentence({ difficulty: "easy" }))
@@ -360,6 +362,20 @@ export default function Home() {
     setStartTime(null)
     setStats(null)
   }
+
+  useEffect(() => {
+    const channel = pusher.subscribe("private-game")
+
+    channel.bind("client-test", (data: {}) => {
+      console.log(">> PLAYER_JOINED")
+    })
+
+    gameChannel.current = channel
+
+    return () => {
+      pusher.unsubscribe("private-game")
+    }
+  }, [])
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
@@ -403,8 +419,16 @@ export default function Home() {
 
   return (
     <main className="grid h-[100svh] place-content-center backdrop-blur-xl">
-      {stats ? <Statistics stats={stats} /> : null}
-      <SentenceView sentence={sentence} userInput={userInput} />
+      {/* <Statistics stats={stats ?? { duration: 0, numChars: 0 }} />
+      <SentenceView sentence={sentence} userInput={userInput} /> */}
+
+      <button
+        onClick={() => {
+          gameChannel.current!.trigger("client-test", {})
+        }}
+      >
+        hit
+      </button>
     </main>
   )
 }
