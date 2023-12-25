@@ -1,84 +1,83 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 
 import { RunStats } from "@/components/run-stats"
 import { Sentence } from "@/components/sentence"
-import { pusher, type Channel } from "@/lib/util/pusher/client"
+import { useGameState } from "@/lib/slices"
 import { generateRandomSentence } from "@/lib/util/sentences/generateRandomSentence"
 
 export default function Home() {
-  const [sentence, setSentence] = useState("")
-  const [userInput, setUserInput] = useState("")
+  const { players, addPlayer, setPlayerSentence, updatePlayerInput } =
+    useGameState()
+
   const [startTime, setStartTime] = useState<number | null>(null)
   const [stats, setStats] = useState<RunInfo | null>(null)
-  const gameChannel = useRef<Channel | null>(null)
-
-  const generateSentence = () => {
-    setSentence(generateRandomSentence({ difficulty: "easy" }))
-    setUserInput("")
-    setStartTime(null)
-    setStats(null)
-  }
 
   useEffect(() => {
-    const channel = pusher.subscribe("private-game")
-
-    channel.bind("client-test", (data: {}) => {
-      console.log(">> PLAYER_JOINED")
-    })
-
-    gameChannel.current = channel
-
-    return () => {
-      pusher.unsubscribe("private-game")
-    }
-  }, [])
-
-  useEffect(() => {
+    // Keyboard event handler
     const handleKeyPress = (event: KeyboardEvent) => {
+      // Check if the pressed key is alphanumeric and append
       if (/^[a-zA-Z0-9\s]$/.test(event.key)) {
-        // Check if the pressed key is alphanumeric and append
-        setUserInput((prev) => prev + event.key)
-      } else if (event.key === " ") {
-        // If space bar is pressed, append a space to the typed text
-        setUserInput((prev) => prev + " ")
-      } else if (event.key === "Backspace") {
-        // Handle backspacing
-        setUserInput((prev) => prev.substring(0, prev.length - 1))
-      } else if (event.key === "Enter") {
-        // Handle reset
-        generateSentence()
+        updatePlayerInput(0, players[0].input + event.key)
+      }
+
+      // If space bar is pressed, append a space to the typed text
+      else if (event.key === " ") {
+        updatePlayerInput(0, players[0].input + " ")
+      }
+
+      // Handle backspacing
+      else if (event.key === "Backspace") {
+        updatePlayerInput(
+          0,
+          players[0].input.substring(0, players[0].input.length - 1),
+        )
+      }
+
+      // Handle reset
+      else if (event.key === "Enter") {
+        setPlayerSentence(0, generateRandomSentence({ difficulty: "easy" }))
       }
     }
-
-    // Generate first sentence
-    generateSentence()
-
     // Add event listener for keydown event
     document.addEventListener("keydown", handleKeyPress)
+
+    // Add the local player
+    if (players.length === 0)
+      addPlayer({ name: "liqui", input: "", sentence: "first load" })
 
     // Cleanup the event listener on component unmount
     return () => {
       document.removeEventListener("keydown", handleKeyPress)
     }
-  }, [])
+  })
 
+  // Game logic
   useEffect(() => {
-    if (userInput.length === 1 && startTime === null) setStartTime(Date.now())
+    if (players.length === 0) return
 
-    if (userInput.length === sentence.length && startTime !== null) {
+    if (players[0].input.length === 1 && startTime === null)
+      setStartTime(Date.now())
+
+    if (
+      players[0].input.length === players[0].sentence.length &&
+      startTime !== null
+    ) {
       {
         const duration = Date.now() - startTime
-        setStats({ duration, numChars: sentence.length })
+        setStats({ duration, numChars: players[0].sentence.length })
+        setStartTime(null)
       }
     }
-  }, [userInput, sentence, startTime])
+  }, [players, startTime])
+
+  if (players.length === 0) return
 
   return (
     <main className="grid h-[100svh] place-content-center backdrop-blur-xl">
       <RunStats runInfo={stats ?? { duration: 0, numChars: 0 }} />
-      <Sentence sentence={sentence} userInput={userInput} />
+      <Sentence sentence={players[0].sentence} userInput={players[0].input} />
     </main>
   )
 }
