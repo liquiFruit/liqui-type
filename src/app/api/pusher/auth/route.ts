@@ -6,7 +6,7 @@ export async function POST(req: Request) {
     .split("&")
     .map((str) => str.split("=")[1])
 
-  const id = "1"
+  const id = Date.now().toString()
 
   const presenceData = {
     user_id: id,

@@ -19,7 +19,13 @@ type GameActions = {
 }
 
 export const useGameState = create<GameState & GameActions>((set) => ({
-  players: [],
+  players: [
+    {
+      name: "liqui",
+      sentence: "first load from store",
+      input: "",
+    },
+  ],
 
   addPlayer(newPlayer) {
     set(

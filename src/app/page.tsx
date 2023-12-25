@@ -5,6 +5,7 @@ import { useEffect, useState } from "react"
 import { RunStats } from "@/components/run-stats"
 import { Sentence } from "@/components/sentence"
 import { useGameState } from "@/lib/slices"
+import { pusher } from "@/lib/util/pusher/client"
 import { generateRandomSentence } from "@/lib/util/sentences/generateRandomSentence"
 
 export default function Home() {
@@ -14,8 +15,11 @@ export default function Home() {
   const [startTime, setStartTime] = useState<number | null>(null)
   const [stats, setStats] = useState<RunInfo | null>(null)
 
+  // Setup event handlers
   useEffect(() => {
     // Keyboard event handler
+    //
+    //
     const handleKeyPress = (event: KeyboardEvent) => {
       // Check if the pressed key is alphanumeric and append
       if (/^[a-zA-Z0-9\s]$/.test(event.key)) {
@@ -40,16 +44,31 @@ export default function Home() {
         setPlayerSentence(0, generateRandomSentence({ difficulty: "easy" }))
       }
     }
-    // Add event listener for keydown event
     document.addEventListener("keydown", handleKeyPress)
 
-    // Add the local player
-    if (players.length === 0)
-      addPlayer({ name: "liqui", input: "", sentence: "first load" })
+    // Pusher config
+    //
+    //
+    const channel = pusher.subscribe("private-game")
+
+    channel.bind("client-ping", (data: number) => {
+      console.log("ping: ", data)
+      channel.emit("client-pong", Date.now())
+    })
+
+    channel.bind("client-pong", (data: number) => {
+      console.log("pong: ", data)
+    })
+
+    channel.emit("client-ping", Date.now(), { user_id: "1" })
 
     // Cleanup the event listener on component unmount
+    //
+    //
     return () => {
       document.removeEventListener("keydown", handleKeyPress)
+
+      channel.cancelSubscription()
     }
   })
 
@@ -72,12 +91,14 @@ export default function Home() {
     }
   }, [players, startTime])
 
-  if (players.length === 0) return
-
   return (
     <main className="grid h-[100svh] place-content-center backdrop-blur-xl">
-      <RunStats runInfo={stats ?? { duration: 0, numChars: 0 }} />
-      <Sentence sentence={players[0].sentence} userInput={players[0].input} />
+      {players.map((p) => (
+        <div key={p.name}>
+          <RunStats runInfo={stats ?? { duration: 0, numChars: 0 }} />
+          <Sentence sentence={p.sentence} userInput={p.input} />
+        </div>
+      ))}
     </main>
   )
 }
