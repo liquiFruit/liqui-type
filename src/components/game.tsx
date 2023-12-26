@@ -15,6 +15,10 @@ export function Game() {
   const [startTime, setStartTime] = useState<number | null>(null)
   const [stats, setStats] = useState<RunInfo | null>(null)
 
+  const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">(
+    "easy",
+  )
+
   //
   // Pusher config
   //
@@ -103,7 +107,7 @@ export function Game() {
         const newPlayerData = {
           name: localUser,
           input: "",
-          sentence: generateRandomSentence({ difficulty: "easy" }),
+          sentence: generateRandomSentence({ difficulty }),
         }
         updatePlayer(newPlayerData)
         setStartTime(null)
@@ -120,7 +124,7 @@ export function Game() {
       gameChannel.current?.unbind_all()
       gameChannel.current?.cancelSubscription()
     }
-  }, [localUser, updatePlayer, players, addPlayer])
+  }, [difficulty, localUser, updatePlayer, players, addPlayer])
 
   // Game logic
   useEffect(() => {
@@ -143,6 +147,20 @@ export function Game() {
 
   return (
     <div>
+      <div
+        onClick={() =>
+          setDifficulty(
+            difficulty === "easy"
+              ? "medium"
+              : difficulty === "medium"
+                ? "hard"
+                : "easy",
+          )
+        }
+      >
+        {difficulty}
+      </div>
+
       <div key={localUser}>
         <p className="text-green-500">lu: {localUser}</p>
         <RunStats runInfo={stats ?? { duration: 0, numChars: 0 }} />
