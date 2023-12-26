@@ -3,51 +3,47 @@
 import { produce } from "immer"
 import { create } from "zustand"
 
-type PlayerState = {
-  name: string
-  sentence: string
-  input: string
-}
-type GameState = {
-  players: PlayerState[]
-}
-
 type GameActions = {
+  addLocalPlayer: (newPlayer: PlayerState) => void
   addPlayer: (newPlayer: PlayerState) => void
-  updatePlayerInput: (playerId: number, newInput: string) => void
-  setPlayerSentence: (playerId: number, newSentence: string) => void
+  updatePlayerInput: (username: string, newInput: string) => void
+  setPlayerSentence: (username: string, newSentence: string) => void
 }
 
 export const useGameState = create<GameState & GameActions>((set) => ({
-  players: [
-    {
-      name: "liqui",
-      sentence: "first load from store",
-      input: "",
-    },
-  ],
+  players: {},
+  localUser: "",
+
+  addLocalPlayer(newPlayer) {
+    set(
+      produce((state: GameState) => {
+        state.players[newPlayer.name] = newPlayer
+        state.localUser = "j"
+      }),
+    )
+  },
 
   addPlayer(newPlayer) {
     set(
       produce((state: GameState) => {
-        state.players.push(newPlayer)
+        state.players[newPlayer.name] = newPlayer
       }),
     )
   },
 
-  updatePlayerInput(playerId, newInput) {
+  updatePlayerInput(username, newInput) {
     set(
       produce((state: GameState) => {
-        state.players[playerId].input = newInput
+        state.players[username].input = newInput
       }),
     )
   },
 
-  setPlayerSentence(playerId, newSentence) {
+  setPlayerSentence(username, newSentence) {
     set(
       produce((state: GameState) => {
-        state.players[playerId].input = ""
-        state.players[playerId].sentence = newSentence
+        state.players[username].input = ""
+        state.players[username].sentence = newSentence
       }),
     )
   },
