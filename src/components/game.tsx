@@ -1,32 +1,83 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 import { RunStats } from "@/components/run-stats"
 import { Sentence } from "@/components/sentence"
 import { useGameState } from "@/lib/slices"
-import { pusher } from "@/lib/util/pusher/client"
+import { Channel, pusher } from "@/lib/util/pusher/client"
 import { generateRandomSentence } from "@/lib/util/sentences/generateRandomSentence"
 
 export function Game() {
-  const {
-    localUser,
-    players,
-    addPlayer,
-    setPlayerSentence,
-    updatePlayerInput,
-  } = useGameState()
+  const { localUser, players, addPlayer, updatePlayer } = useGameState()
+  const gameChannel = useRef<Channel | null>(null)
 
   const [startTime, setStartTime] = useState<number | null>(null)
   const [stats, setStats] = useState<RunInfo | null>(null)
 
-  console.log(players)
+  //
+  // Pusher config
+  //
+  useEffect(
+    () => {
+      const channel = pusher.subscribe("private-game")
+      gameChannel.current = channel
 
-  // Setup event handlers
+      setTimeout(
+        () => channel.trigger("client-player-joined", players[localUser]),
+        2000,
+      )
+
+      return () => {
+        channel.unbind_all()
+        channel.cancelSubscription()
+      }
+    },
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  )
+
+  //
+  // Keyboard event handler
+  //
   useEffect(() => {
-    //
-    // Keyboard event handler
-    //
+    if (!gameChannel.current) return
+
+    // Bind pusher channel
+    {
+      gameChannel.current.bind("client-player-joined", (data: PlayerState) => {
+        console.log("player joined: ", data.name)
+
+        if (players[data.name]) {
+          console.log("skipping")
+          return
+        }
+
+        addPlayer(data)
+
+        console.log("responding")
+        gameChannel.current?.trigger(
+          "client-player-joined-response",
+          players[localUser],
+        )
+      })
+
+      gameChannel.current?.bind(
+        "client-player-joined-response",
+        (data: PlayerState) => {
+          console.log("player joined echo from: ", data.name)
+
+          if (!players[data.name]) addPlayer(data)
+        },
+      )
+
+      gameChannel.current?.bind("client-player-update", (data: PlayerState) => {
+        updatePlayer(data)
+      })
+    }
+
+    // Bind key handler
     const handleKeyPress = (event: KeyboardEvent) => {
       // Check if the pressed key is alphanumeric or backspace
       if (
@@ -34,63 +85,42 @@ export function Game() {
         event.key === " " ||
         event.key === "Backspace"
       ) {
-        updatePlayerInput(localUser, event.key)
+        const playerData = players[localUser]
+        const newPlayerData = {
+          ...playerData,
+          input:
+            event.key === "Backspace"
+              ? playerData.input.substring(0, -1)
+              : playerData.input + event.key,
+        }
+
+        updatePlayer(newPlayerData)
+        gameChannel.current?.trigger("client-player-update", newPlayerData)
       }
 
       // Handle reset
       else if (event.key === "Enter") {
-        setPlayerSentence(
-          localUser,
-          generateRandomSentence({ difficulty: "easy" }),
-        )
-
+        const newPlayerData = {
+          name: localUser,
+          input: "",
+          sentence: generateRandomSentence({ difficulty: "easy" }),
+        }
+        updatePlayer(newPlayerData)
         setStartTime(null)
+
+        gameChannel.current?.trigger("client-player-update", newPlayerData)
       }
     }
 
     document.addEventListener("keydown", handleKeyPress)
 
-    //
-    // Pusher config
-    //
-    const channel = pusher.subscribe("private-game")
-
-    channel.bind("client-player-joined", (data: PlayerState) => {
-      console.log("player joined: ", data.name)
-
-      if (players[data.name]) {
-        console.log("skipping")
-        return
-      }
-
-      addPlayer(data)
-
-      console.log("responding")
-      channel.trigger("client-player-joined-response", players[localUser])
-    })
-
-    channel.bind("client-player-joined-response", (data: PlayerState) => {
-      console.log("player joined echo from: ", data.name)
-
-      if (!players[data.name]) addPlayer(data)
-    })
-
-    setTimeout(
-      () => channel.trigger("client-player-joined", players[localUser]),
-      2000,
-    )
-
-    //
-    // Cleanup the event listener on component unmount
-    //
+    // Cleanup handlers
     return () => {
-      console.log(">> CLEAN UP GAME")
       document.removeEventListener("keydown", handleKeyPress)
-
-      channel.unbind_all()
-      channel.cancelSubscription()
+      gameChannel.current?.unbind_all()
+      gameChannel.current?.cancelSubscription()
     }
-  }, [])
+  }, [localUser, updatePlayer, players, addPlayer])
 
   // Game logic
   useEffect(() => {

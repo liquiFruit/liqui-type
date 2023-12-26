@@ -6,8 +6,7 @@ import { create } from "zustand"
 type GameActions = {
   addLocalPlayer: (newPlayer: PlayerState) => void
   addPlayer: (newPlayer: PlayerState) => void
-  updatePlayerInput: (username: string, newInput: string) => void
-  setPlayerSentence: (username: string, newSentence: string) => void
+  updatePlayer: (playerDate: PlayerState) => void
 }
 
 export const useGameState = create<GameState & GameActions>((set) => ({
@@ -31,23 +30,10 @@ export const useGameState = create<GameState & GameActions>((set) => ({
     )
   },
 
-  updatePlayerInput(username, newInput) {
+  updatePlayer(playerDate) {
     set(
-      produce((state: GameState) => {
-        const currInput = state.players[username].input
-
-        if (newInput === "Backspace")
-          state.players[username].input = currInput.slice(0, -1)
-        else state.players[username].input = currInput + newInput
-      }),
-    )
-  },
-
-  setPlayerSentence(username, newSentence) {
-    set(
-      produce((state: GameState) => {
-        state.players[username].input = ""
-        state.players[username].sentence = newSentence
+      produce((s: GameState) => {
+        s.players[playerDate.name] = playerDate
       }),
     )
   },
