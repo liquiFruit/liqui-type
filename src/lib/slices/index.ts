@@ -18,7 +18,7 @@ export const useGameState = create<GameState & GameActions>((set) => ({
     set(
       produce((state: GameState) => {
         state.players[newPlayer.name] = newPlayer
-        state.localUser = "j"
+        state.localUser = newPlayer.name
       }),
     )
   },
@@ -34,7 +34,11 @@ export const useGameState = create<GameState & GameActions>((set) => ({
   updatePlayerInput(username, newInput) {
     set(
       produce((state: GameState) => {
-        state.players[username].input = newInput
+        const currInput = state.players[username].input
+
+        if (newInput === "Backspace")
+          state.players[username].input = currInput.slice(0, -1)
+        else state.players[username].input = currInput + newInput
       }),
     )
   },
