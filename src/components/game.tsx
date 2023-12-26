@@ -90,7 +90,7 @@ export function Game() {
           ...playerData,
           input:
             event.key === "Backspace"
-              ? playerData.input.substring(0, -1)
+              ? playerData.input.substring(0, playerData.input.length - 1)
               : playerData.input + event.key,
         }
 
