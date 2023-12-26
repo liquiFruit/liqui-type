@@ -78,6 +78,7 @@ export function Game() {
 
       gameChannel.current?.bind("client-player-update", (data: PlayerState) => {
         updatePlayer(data)
+        if (data.name === localUser) setStartTime(null)
       })
     }
 
@@ -104,15 +105,17 @@ export function Game() {
 
       // Handle reset
       else if (event.key === "Enter") {
-        const newPlayerData = {
-          name: localUser,
-          input: "",
-          sentence: generateRandomSentence({ difficulty }),
-        }
-        updatePlayer(newPlayerData)
+        const sentence = generateRandomSentence({ difficulty })
         setStartTime(null)
 
-        gameChannel.current?.trigger("client-player-update", newPlayerData)
+        Object.values(players).forEach((player) => {
+          const newPlayerData = { name: player.name, input: "", sentence }
+          updatePlayer(newPlayerData)
+          gameChannel.current?.trigger("client-player-update", {
+            ...newPlayerData,
+            name: player.name,
+          })
+        })
       }
     }
 
