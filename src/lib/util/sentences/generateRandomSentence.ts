@@ -321,7 +321,12 @@ export function generateRandomSentence({
   difficulty: "easy" | "medium" | "hard"
   length?: number
 }) {
-  const available_words = words[difficulty]
+  const available_words =
+    difficulty === "easy"
+      ? words.easy
+      : difficulty === "medium"
+        ? words.easy.concat(words.medium)
+        : words.easy.concat(words.medium).concat(words.hard)
   let sentence: string[] = []
 
   for (let i = 0; i < length; i++) {
